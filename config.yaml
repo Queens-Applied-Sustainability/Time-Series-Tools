@@ -1,0 +1,51 @@
+
+import:
+    routine: rtms.csv_open
+    file: time-series.csv
+    const:
+        description: NREL BMS
+        latitude: 39.74
+        longitude: -105.18
+        elevation: 1.829
+        surface_type: vegetation
+        atmosphere: sub-arctic summer
+    map:
+        DateTime: time
+        GlobalCM22: irradiance
+        Temperature: temperature
+        RelativeHumidity: relative_humidity
+        Pressure: pressure
+
+
+select:
+    routine: rtms.clear_point_select
+    data:
+        from: import
+
+
+optimize_clear:
+    routine: rtms.optimize
+    model: rtms.models.SMARTS
+    target: irradiance
+    variable: angstroms_coefficient
+    data:
+        from: select
+        if: true # "if" is provided by rtms.clear_point_selector
+
+
+interpolate_aod:
+    routine: rtms.linear_interpolate
+    dependant: angstroms_coefficient
+    independant: time
+    data:
+        from: import
+        with: optimize_clear
+
+
+optimize_cloudy:
+    routeine: rtms.optimize
+    model: rtms.models.SBdart
+    target: irradiance
+    variable: cloud_optical_thickness
+    data:
+        from: interpolate_aod
