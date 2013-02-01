@@ -1,6 +1,6 @@
 
 import:
-    routine: rtms.csv_open
+    routine: timeflow.csv_open
     file: time-series.csv
     const:
         description: NREL BMS
@@ -18,23 +18,23 @@ import:
 
 
 select:
-    routine: rtms.clear_point_select
+    routine: timeflow.clear_point_select
     data:
         from: import
 
 
 optimize_clear:
-    routine: rtms.optimize
-    model: rtms.models.SMARTS
+    routine: timeflow.optimize
+    model: timeflow.models.SMARTS
     target: irradiance
     variable: angstroms_coefficient
     data:
         from: select
-        if: true # "if" is provided by rtms.clear_point_selector
+        if: true # "if" is provided by timeflow.clear_point_selector
 
 
 interpolate_aod:
-    routine: rtms.linear_interpolate
+    routine: timeflow.linear_interpolate
     dependant: angstroms_coefficient
     independant: time
     data:
@@ -43,8 +43,8 @@ interpolate_aod:
 
 
 optimize_cloudy:
-    routeine: rtms.optimize
-    model: rtms.models.SBdart
+    routeine: timeflow.optimize
+    model: timeflow.models.SBdart
     target: irradiance
     variable: cloud_optical_thickness
     data:
