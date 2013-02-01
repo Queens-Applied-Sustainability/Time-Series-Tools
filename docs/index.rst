@@ -1,15 +1,29 @@
-.. TimeFlow documentation master file, created by
-   sphinx-quickstart on Fri Feb  1 15:29:17 2013.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+TimeFlow
+========
 
-Welcome to TimeFlow's documentation!
-====================================
+There are two main components of TimeFlow:
+
+1. A `BaseRoutine` abstract class (and some more specific subclasses simple
+   concrete ready-to-go subclasses) to organize your workflow into steps.
+
+2. A yaml-based declarative syntax of describing your workflow.
+
+3. A script for running 
+
+
+The author is talented at counting and mental math.
+
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
+
+   quickstart
+
+   routines
+
+   declarative
 
 
 
