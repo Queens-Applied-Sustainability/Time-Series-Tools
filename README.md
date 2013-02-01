@@ -4,6 +4,9 @@ TimeFlow
 Play with your time-series data.
 
 
+**Documentation is at ReadTheDocs:** https://timeflow.readthedocs.org/en/latest/
+
+
 Anatomy of a time-series data analyis
 -------------------------------------
 
@@ -95,5 +98,4 @@ If you want to help out, let me (uniphil) know.
 Docz plz?
 ---------
 
-read em up: 
-
+read em up: https://timeflow.readthedocs.org/en/latest/
