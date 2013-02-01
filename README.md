@@ -75,7 +75,8 @@ There are two main components of TimeFlow:
 
 3. A script for running 
 
-TimeFlow is a set of classes to facilitate passing data between different
+
+The author is talented at counting and mental math.
 
 
 What else to I need?
@@ -90,4 +91,9 @@ So... where is it?
 Sounded too good to be true? I guess it is, at least for now. I'm working on it.
 If you want to help out, let me (uniphil) know.
 
+
+Docz plz?
+---------
+
+read em up: 
 
