@@ -7,10 +7,16 @@ DEFAULT_WORKFLOW_FILENAME = 'workflow.yaml'
 def flowback(workflow, label):
     """build working stuff"""
     step_meta = workflow[label]
+
     if step_meta['data']['from'] in workflow.keys():
         data_from = flowback(workflow, step_meta['data']['from'])
+    elif '.' not in step_meta['data']['from']:
+        raise ValueError('could not find step {}'.format(step_meta['data']['from']))
     else:
-        data_from = ''
+        data_parts = step_meta['data']['from'].split('.')
+        data_module = __import__('.'.join(data_parts[:-1]))
+        data_step = getattr(data_module, data_parts[-1])
+        data_from = data_step(**step_meta['data'])
 
     routine_parts = step_meta['routine'].split('.')
     module_name = '.'.join(routine_parts[:-1])

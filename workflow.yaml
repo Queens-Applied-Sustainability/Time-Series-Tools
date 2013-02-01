@@ -1,22 +1,14 @@
 
 import:
     data:
-        from: timeflow.file
+        from: timeflow.File
         filename: time-series.csv
     routine: timeflow.CSV
     map:
         DateTime: time
-        GlobalCM22: irradiance
         Temperature: temperature
-        RelativeHumidity: relative_humidity
-        Pressure: pressure
     const:
-        description: NREL BMS
-        latitude: 39.74
-        longitude: -105.18
-        elevation: 1.829
-        surface_type: vegetation
-        atmosphere: sub-arctic summer
+        description: bs
 
 
 select:
@@ -24,34 +16,5 @@ select:
         from: import
     routine: timeflow.Threshold
     column: temperature
-    filter: "<="
-    value: 13
-    #routine: rtms.clear_point_select
-
-
-optimize_clear:
-    data:
-        from: select
-        if: true # "if" is provided by timeflow.clear_point_selector
-    routine: rtms.optimize
-    model: rtms.models.SMARTS
-    target: irradiance
-    variable: angstroms_coefficient
-
-
-interpolate_aod:
-    data:
-        from: import
-        with: optimize_clear
-    routine: timeflow.linear_interpolate
-    dependant: angstroms_coefficient
-    independant: time
-
-
-optimize_cloudy:
-    data:
-        from: interpolate_aod
-    routeine: rtms.optimize
-    model: rtms.models.SBdart
-    target: irradiance
-    variable: cloud_optical_thickness
+    filter: ">"
+    value: 15.2
