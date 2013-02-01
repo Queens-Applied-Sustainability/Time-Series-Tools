@@ -4,10 +4,14 @@ class StepBase(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def timeseries(self): pass
+    def timeseries(self):
+        """A chunk of timeseries data represented as a numpy recarray is the
+        basic unit of a timeflow.
+        """
+        pass
 
-    @abstractmethod
-    def stream(self): pass
+    def stream(self):
+        raise NotImplementedError('to do. auto-stream the timeseries.')
 
 
 class File(StepBase):
@@ -16,8 +20,8 @@ class File(StepBase):
         self.filename = filename
 
     def timeseries(self):
-        raise NotImplementedError('file routines don\'t provide timeseries. '\
-            'Try File.stream() for a file object.')
+        raise NotImplementedError('This file routine does not provide a '\
+            'timeseries directly. File.stream() will give you a file object.')
 
     def stream(self):
         return open(self.filename)
