@@ -81,7 +81,7 @@ TimeFlow is a set of classes to facilitate passing data between different
 What else to I need?
 --------------------
 
- * _Numpy_ -- TimeFlow uses numpy `ndarray`s internally for all data.
+ * **Numpy** -- TimeFlow uses numpy `ndarray`s internally for all data.
 
 
 So... where is it?
