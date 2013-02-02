@@ -29,7 +29,20 @@ Stores data internally on the [something] property.
 Routine Cycle
 ~~~~~~~~~~~~~
 
+#. The routine is asked if its data has changed.
 
+    * if it knows, it can respond right away.
+    * if it depends on whether a dependency's data has changed, it passes
+      the request up the chain, and passes the response back down.
+
+#. The routine may be asked for its data, possibly with arguments.
+#. The routine may ask a dependency for data.
+#. The routine provides gives the data back.
+
+The first and last routines in a chain are special. The first one can get its
+data from wherever it wants, but must still provide returned data in the
+standard timeflow format. The last one has to get data in that format, but may
+return data in an arbirary format. Or do anything, like open a plot.
 
 
 Built-in Routines
