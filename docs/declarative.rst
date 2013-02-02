@@ -43,4 +43,8 @@ access the routine:
    `.`, with an importable object matching the label following the last `.`.
 
 
+Additional Properties
+---------------------
+
+Any additional properties will tell the routine about itself when created.
 
