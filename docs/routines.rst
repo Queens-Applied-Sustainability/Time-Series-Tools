@@ -12,11 +12,24 @@ Base Classes
 RoutineBase
 ^^^^^^^^^^^
 
-An abstract base class that gives the basic TimeFlow mechanics for free:
+An abstract base class that gives the basic TimeFlow mechanics for free.
 
-blah blah blah
+routines just import and then export.
 
-Stores data internally on the _____ property.
+when something calls one of their exports, they try to import whatever is
+necessary and then give the result.
+
+future plan: ask if data has changed (which gets propagated all the way up to
+the first file, or other thing that has actually changed. if nothing changed,
+reply with the memoized value.)
+
+Stores data internally on the [something] property.
+
+
+Routine Cycle
+~~~~~~~~~~~~~
+
+
 
 
 Built-in Routines
@@ -26,21 +39,23 @@ The built-in routines are useful on their own, but also designed to be
 subclassed. Extend away!
 
 
-Import
-^^^^^^
+File
+^^^^
 
 Import data from a variety of formats
+
+eventually this will have an answer for whether the file has changed.
 
 
 Export
 ^^^^^^
 
-take a guess....
+numpy, pickle, csv, ...
 
 
 Plot
 ^^^^
 
-
+make pretty graphs
 
 
