@@ -4,6 +4,10 @@ Declarative Workflows
 Once you have your collection of Routines, you can describe the workflow itself
 with a `yaml` file.
 
+
+The YAML file
+-------------
+
 The `yaml` file is a collection of descriptions of your routines. There are
 three important aspects of a routine description:
 
@@ -15,14 +19,14 @@ three important aspects of a routine description:
 
 
 The Label
----------
+^^^^^^^^^
 
 The label must simply be a valid json label. Alpha-numeric plus underscores,
 starting with a letter.
 
 
 The Data Property
------------------
+^^^^^^^^^^^^^^^^^
 
 The `data` property has one required sub-property, `from`. `from` can name
 another routine in the yaml workflow, or an external routine. External routines
@@ -44,7 +48,20 @@ access the routine:
 
 
 Additional Properties
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
 Any additional properties will tell the routine about itself when created.
+
+
+Running a Workflow
+------------------
+
+Run the whole thing: `timeflow workflow.yaml`
+
+Run a routine (and all its dependencies): `timeflow workflow.yaml routine`
+
+Specifiy what sort of output you want: `timeflow workflow -o csv`
+
+ * The label after the `-o` file will first try to use a builtin timeflow,
+   or try to import an export routine if it contains a dot.
 
