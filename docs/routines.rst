@@ -72,8 +72,8 @@ Arguments may be attached to the proxy to be passed onto the source (see above),
 and some extra stuff is available.
 
 Two ancestor tables can be joined by specifying :code:`with` with another
-routine on the data proxy. Currently, it's a left outer join on the left-most
-column of each table. The left table takes precedence on conflicting columns.
+routine on the data proxy. Currently, it's a left join on the left-most column
+of each table. The left table takes precedence on conflicting columns.
 
 More flexible joining options will be explored at a later time.
 
