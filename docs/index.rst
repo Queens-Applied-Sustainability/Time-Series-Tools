@@ -3,8 +3,8 @@ TimeFlow
 
 There are two main components of TimeFlow:
 
-1. A `BaseRoutine` abstract class (and some more specific subclasses simple
-   concrete ready-to-go subclasses) to organize your workflow into steps.
+1. A :code:`BaseRoutine` abstract class (and some more specific subclasses
+   simple concrete ready-to-go subclasses) to organize your workflow into steps.
 
 2. A yaml-based declarative syntax of describing your workflow.
 

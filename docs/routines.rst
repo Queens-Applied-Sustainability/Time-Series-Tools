@@ -45,6 +45,21 @@ standard timeflow format. The last one has to get data in that format, but may
 return data in an arbirary format. Or do anything, like open a plot.
 
 
+How do Routines Affect Data?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When a routine is asked for its output, it should return one of
+
+* The original table augmented with one or more extra columns
+* The original table, with modifications to values in one or more columns
+
+Routines may accept arguments with data requests, and return data in a form
+appropriate to the arguments. For example, a filter might, by default, add a
+column to the data annotating whether a row passed or failed a criteria. Passing
+the routine an :code:`if` argument when requesting data could cause it to instead
+remove rows which pass or fail the criteria.
+
+
 Built-in Routines
 -----------------
 
