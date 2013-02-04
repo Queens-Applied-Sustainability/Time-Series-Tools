@@ -5,6 +5,10 @@ Routines are the building blocks of TimeFlow workflows. If you are scripting in
 python, you can use them directly. Support for building non-python algorithms
 into TimeFlow routines is planned.
 
+The left-most column is used as the independent variable when joining tables,
+and in all standard routines (currently only :code:`linear_interpolate`) which
+require an independant reference variable.
+
 
 Base Classes
 ------------
@@ -56,8 +60,22 @@ When a routine is asked for its output, it should return one of
 Routines may accept arguments with data requests, and return data in a form
 appropriate to the arguments. For example, a filter might, by default, add a
 column to the data annotating whether a row passed or failed a criteria. Passing
-the routine an :code:`if` argument when requesting data could cause it to instead
-remove rows which pass or fail the criteria.
+the routine an :code:`if` argument when requesting data could cause it to
+instead remove rows which pass or fail the criteria.
+
+
+The Data Proxy
+~~~~~~~~~~~~~~
+
+Data proxies are objects attached to a routine which link it to its data source.
+Arguments may be attached to the proxy to be passed onto the source (see above),
+and some extra stuff is available.
+
+Two ancestor tables can be joined by specifying :code:`with` with another
+routine on the data proxy. Currently, it's a left outer join on the left-most
+column of each table. The left table takes precedence on conflicting columns.
+
+More flexible joining options will be explored at a later time.
 
 
 Built-in Routines
