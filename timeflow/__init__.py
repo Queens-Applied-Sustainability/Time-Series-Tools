@@ -53,7 +53,7 @@ class RoutineBase(object):
 
     def get_new(self, *args, **kwargs):
         columns = self.operate(*args, **kwargs)
-        return column
+        return columns
 
     def get_all(self, *args, **kwargs):
         columns = self.get_new(*args, **kwargs)
@@ -96,8 +96,15 @@ class CSVImport(RoutineBase):
         self.map = map
         self.const = const
 
+    @property
+    def data(self):
+        class C(object):
+            def get_all(self):
+                return ndarray([0, 0], dtype=[('time', 'f8'), ('temperature', 'f8')])
+        return C()
+
     def operate(self):
-        return ndarray()
+        return self.data
 
 
 if __name__ == '__main__':
