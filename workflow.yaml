@@ -2,8 +2,7 @@
 import:
     routine: timeflow.CSVImport
     data:
-        source: timeflow.File
-        filename: time-series.csv
+        source: time-series.csv
     map:
         DateTime: time
         Temperature: temperature

@@ -27,7 +27,7 @@ class DataConnector(object):
                 'Registered routines: {}'.format(self.source_label,
                 ', '.join(self.routine_registry.keys())))
         source_data = source_routine.get_all()
-        return source_data.get_all()
+        return source_data
 
 
 class RoutineBase(object):
@@ -65,6 +65,51 @@ class RoutineBase(object):
         compressed = self.data.compress(condition)
         return compressed
 
+        
+class FileSource(object):
+    def __init__(self, filename):
+        self.filename = filename
+
+    def get(self):
+        return open(self.filename, 'r')
+            
+
+class FileReadBase(RoutineBase):
+    """Special class opens files.
+    Does not connect to a source with a DataConnector.
+    """
+    __metaclass__ = ABCMeta
+
+    def __init__(self, label, data_from):
+        DataConnector.register(label, self)
+        self._data_source = FileSource(data_from)
+
+    def get_new(self, *args, **kwargs):
+        raise NotImplemented
+
+    def get_all(self, *args, **kwargs):
+        return self.operate(*args, **kwargs)
+
+    def get_if(self, *args, **kwargs):
+        raise NotImplemented
+
+
+
+class CSVImport(FileReadBase):
+    """This import class expects a file-like stream as its source"""
+    def __init__(self, map=None, const=None, **kwargs):
+        super(CSVImport, self).__init__(**kwargs)
+        self._map = map
+        self.const = const
+
+    def operate(self):
+        from numpy import genfromtxt
+        csv_config = {
+            'delimiter': ',',
+            'names': True,
+            'dtype': None,
+        }
+        return genfromtxt(self.data, **csv_config)
 
 
 class BoolFilter(RoutineBase):
@@ -85,37 +130,20 @@ class BoolFilter(RoutineBase):
 
     def operate(self):
         column = self.data[self.thresh_column]
-        result = cmp_trans[self.thresh_operator](self.thresh_value, column)
+        result = self.cmp_trans[self.thresh_operator](self.thresh_value, column)
         return result
-
-
-class CSVImport(RoutineBase):
-    """This import class expects a file-like stream as its source"""
-    def __init__(self, map=None, const=None, **kwargs):
-        super(CSVImport, self).__init__(**kwargs)
-        self.map = map
-        self.const = const
-
-    @property
-    def data(self):
-        class C(object):
-            def get_all(self):
-                return ndarray([0, 0], dtype=[('time', 'f8'), ('temperature', 'f8')])
-        return C()
-
-    def operate(self):
-        return self.data
 
 
 if __name__ == '__main__':
 
-    imp = CSVImport(label='import', data_from='File',
-                    source_modifiers={'filename': 'time-series.csv'})
+    imp = CSVImport(label='import', data_from='../time-series.csv')
 
     bfilter = BoolFilter(label='bfilt', data_from='import',
                          column='temperature', operator='<', value=15.3)
 
-    print bfilter.data
+    print imp.get_all()
+    print bfilter.get_all()
+    print bfilter.data.dtype
 
 
 class File(RoutineBase):
