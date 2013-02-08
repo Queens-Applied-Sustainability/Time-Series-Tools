@@ -1,9 +1,9 @@
 
 import:
+    routine: timeflow.CSVImport
     data:
-        from: timeflow.File
+        source: timeflow.File
         filename: time-series.csv
-    routine: timeflow.CSV
     map:
         DateTime: time
         Temperature: temperature
@@ -11,10 +11,17 @@ import:
         description: bs
 
 
-select:
+select_clear:
+    routine: timeflow.BoolFilter
     data:
-        from: import
-    routine: timeflow.Threshold
+        source: import
     column: temperature
-    filter: ">"
+    operator: ">"
     value: 15.2
+
+
+save:
+    routine: timeflow.CSVExport
+    data:
+        source: select
+        if: true

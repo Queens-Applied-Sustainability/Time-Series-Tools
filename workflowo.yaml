@@ -1,16 +1,23 @@
 
-import:
+map_names:
     data:
-        from: timeflow.file
+        source: timeflow.File
         filename: time-series.csv
-    routine: timeflow.CSV
+    routine: timeflow.MapNames
+    mode: exclusive # trim columns that are not mapped
     map:
         DateTime: time
         GlobalCM22: irradiance
         Temperature: temperature
         RelativeHumidity: relative_humidity
         Pressure: pressure
-    const:
+
+
+insert_constants:
+    data:
+        source: map_names
+    routine: timeflow.SetConstants
+    constants:
         description: NREL BMS
         latitude: 39.74
         longitude: -105.18
@@ -19,20 +26,26 @@ import:
         atmosphere: sub-arctic summer
 
 
+daylight_points:
+    data:
+        source: insert_constants
+    routine: timeflow.Threshold
+    column: irradiance
+    operator: <
+    value: 12.5 # Watts/m^2
+
+
 select:
     data:
-        from: import
-    routine: timeflow.Threshold
-    column: temperature
-    filter: "<="
-    value: 13
-    #routine: rtms.clear_point_select
+        source: daylight_points
+        if: true
+    routine: rtms.ClearPointSelect
 
 
 optimize_clear:
     data:
-        from: select
-        if: true # "if" is provided by timeflow.clear_point_selector
+        source: select
+        if: true
     routine: rtms.optimize
     model: rtms.models.SMARTS
     target: irradiance
@@ -41,16 +54,17 @@ optimize_clear:
 
 interpolate_aod:
     data:
-        from: import
-        with: optimize_clear
+        source: daylight_points
+        merge:
+            source: optimize_clear
+            column: angstroms_coefficient
     routine: timeflow.linear_interpolate
     dependant: angstroms_coefficient
-    independant: time
 
 
 optimize_cloudy:
     data:
-        from: interpolate_aod
+        source: interpolate_aod
     routeine: rtms.optimize
     model: rtms.models.SBdart
     target: irradiance

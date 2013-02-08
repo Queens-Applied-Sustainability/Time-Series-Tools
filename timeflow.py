@@ -1,7 +1,74 @@
+#!/usr/bin/python
+
+"""
+$ timeflow workflow.yaml --routine select
+
+ask registry for output from select
+    not found, so load it
+        check for dot in name...
+        not found, so look in workflow for name... found.
+    ask select for output
+        select asks registry for output from import
+            not found, so load it...
+            ...
+            import returns
+        select applies processing to data
+        select returns processed data
+
+"""
+
 import yaml
+import timeflow
 
 
-DEFAULT_WORKFLOW_FILENAME = 'workflow.yaml'
+def build_routine(config):
+    """instantiates the configured routine"""
+    print 'Building {} routine...'.format(config['routine'])
+    # try to import the class
+    routine_name = config['routine']
+    if '.' not in routine_name:
+        raise KeyError('no routine "{}"'.format(routine_name))
+    mod_parts = routine_name.split('.')
+    module = __import__('.'.join(mod_parts[:-1]))
+    routine_class = getattr(module, mod_parts[-1])
+    init_config = dict((k, v) for k, v in config.items() if k != 'routine')
+    routine = routine_class(**init_config)
+    return routine
+
+
+class Flow(object):
+    """workflow registry"""
+    def __init__(self, routine_config):
+        self.routine_config = routine_config
+        # set up the routine registry
+        self.registry = {}
+
+    def get(self, routine_label, **kwargs):
+        """return the result of a routine"""
+        try:
+            # be optimistic
+            routine = self.registry[routine_label]
+        except KeyError:
+            # see if it's in the standard config...
+            try:
+                config = self.routine_config[routine_label]
+                routine = build_routine(config)
+            except KeyError:
+                # can we import it?
+                if '.' not in routine_label:
+                    raise KeyError('no routine "{}"'.format(routine_label))
+                mod_parts = routine_label.split('.')
+                module = __import__('.'.join(mod_parts[:-1]))
+                routine = getattr(module, mod_parts[-1])
+
+            self.registry[routine_label] = routine
+
+        return routine.get(**kwargs)
+
+
+
+
+        
 
 
 def flowback(workflow, label):
@@ -32,20 +99,22 @@ if __name__ == '__main__':
     import os, sys
     try:
         workflow_file_name = sys.argv[1]
-        try:
-            workflow_file = open(workflow_file_name)
-        except IOError:
-            raise IOError("Couldn't open {}.".format(workflow_file_name))
-
     except IndexError:
-        try:
-            workflow_file = open(DEFAULT_WORKFLOW_FILENAME)
-        except IOError:
-            raise IOError("Couldn't find {}.".format(DEFAULT_WORKFLOW_FILENAME))
+        raise LookupError('missing input filename')
+    try:
+        routine_name = sys.argv[2]
+    except IndexError:
+        raise LookupError('missing routine name')
 
+    try:
+        workflow_file = open(workflow_file_name)
+    except IOError:
+        raise LookupError('could not open {}'.format(workflow_file_name))
 
     workflow = yaml.load(workflow_file)
 
-    print flowback(workflow, 'select')
+    flow = Flow(workflow)
+
+    print flow.get(routine_name)
 
 
