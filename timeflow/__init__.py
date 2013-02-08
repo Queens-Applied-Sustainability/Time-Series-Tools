@@ -6,17 +6,32 @@ class DataConnector(ndarray):
     """"The connector for sequences of routines.
     Attaches to the acting routine, and references another routine by label.
     """
+    routine_registry = {} # mutable struture is the same for all instances
+
     def __init__(self, source, merge=None, **modifiers):
-        self.source = source
+        self.source_label = source
         self.merge = merge
         self.modifiers = modifiers
+
+    @classmethod
+    def register(cls, label, routine):
+        if label in cls.routine_registry:
+            raise KeyError('Routine label conflict for {}.'.format(label))
+        cls.routine_registry[label] = routine
+
+    def get(self):
+        # handle merges and all that...
+        source_routine = self.routine_registry[self.source_label]
+        source_data = source_routine.get_all()
+        return source_data
 
 
 class RoutineBase(object):
     __metaclass__ = ABCMeta
 
-    def __init__(self, data_from, merge, **modifiers):
+    def __init__(self, label, data_from, merge, **modifiers):
         self._data_source = DataConnector(data_from, **modifiers)
+        DataConnector.register(label, self)
 
     @property
     def data(self):
