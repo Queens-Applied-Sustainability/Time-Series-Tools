@@ -1,6 +1,6 @@
 
-import:
-    routine: timeflow.CSVImport
+map_cols:
+    routine: timeflow.MapColumns
     data:
         source: time-series.csv
     map:
@@ -10,7 +10,7 @@ import:
         description: bs
 
 
-select_clear:
+warm:
     routine: timeflow.BoolFilter
     data:
         source: import
@@ -18,9 +18,12 @@ select_clear:
     operator: ">"
     value: 15.2
 
+# run with
+# timeflow workflow.yaml select_clear -o time-series-out.csv -t csv
 
-save:
-    routine: timeflow.CSVExport
-    data:
-        source: select
-        if: true
+# save:
+#     routine: timeflow.CSVExport
+#     data:
+#         source: warm
+#         if: true
+#     save_to: time-series-out.csv

@@ -1,4 +1,4 @@
-time,temperature
+DateTime,Temperature
 2012-01-01 12:00,15
 2012-01-01 12:01,15.1
 2012-01-01 12:02,15.2
