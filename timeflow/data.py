@@ -6,13 +6,33 @@ import re
 import pandas as pd
 
 
+MODULE_RE = re.compile(r'(.*)\.(\w+)$')
 CSV_RE = re.compile(r'.*\.csv$')
 
 
 class LabeledRegistry(dict):
     """like a dict, but if a keyerror is raised, it will try to import it as
     a module."""
-    pass
+    def __getitem__(self, item):
+        try:
+            # first try to return from the registry
+            return super(LabeledRegistry, self).__getitem__(item)
+        except KeyError: pass
+
+        try:
+            # ok, try importing a module
+            mod, cls = re.match(MODULE_RE, item).groups()
+            mod = __import__(mod)
+            return getattr(mod, cls)
+        except (ImportError, AttributeError): pass
+
+        try:
+            # fine. open a file?
+            return open(item, 'r')
+        except IOError: pass
+
+        raise KeyError('can not get "{}".'.format(item))
+
 
 
 routines = LabeledRegistry()
@@ -24,9 +44,9 @@ class Connector(object):
     If the label is not in the registry, see if we can import it as a filename.
     """
 
-    def __init__(self, source, source_modifiers):
+    def __init__(self, source, **modifiers):
         self.source_label = source
-        self.source_modifiers = source_modifiers
+        self.source_modifiers = modifiers
 
     @classmethod
     def register(cls, label, routine):
@@ -36,27 +56,16 @@ class Connector(object):
 
     def get(self, **kwargs):
         # handle merges and all that...
-        try:
-            # is it registered?
-            source_routine = routines[self.source_label]
-            return source_routine.get_all()
-        except KeyError:
-            # can we open it as a file?
-            try:
-                data_file = open(self.source_label, 'r')
-            except IOError:
-                # TODO: try to import a module...
-                raise KeyError('The routine "{}" is not registered and could '
-                               ' not be opened or imported. Registered '
-                               'routines: {}'.format(self.source_label,
-                               ', '.join(routines.keys())))
-            finally:
-                if re.match(CSV_RE, self.source_label):
-                    index_col = kwargs.get('index_col', 0)
-                    source_data = pd.read_csv(data_file,
-                                              index_col=index_col)
-                    return source_data
-        raise KeyError('Could not get {}.'.format(self.source_label))
+
+        # is it registered?
+        source_routine = routines[self.source_label]
+        if isinstance(source_routine, file):
+            if re.match(CSV_RE, self.source_label):
+                index_col = kwargs.get('index_col', 0)
+                return pd.read_csv(source_routine, index_col=index_col)
+            else:
+                raise IOError('can\'t import that.')
+        return source_routine.get_all()
 
 
 class FileSource(object):

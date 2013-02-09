@@ -5,9 +5,9 @@ from timeflow import data
 class RoutineBase(object):
     __metaclass__ = ABCMeta
 
-    def __init__(self, label, data_from, source_modifiers=None, **setup_kwargs):
+    def __init__(self, label, data_from, **setup_kwargs):
         self.label = label
-        self._data_source = data.Connector(data_from, source_modifiers)
+        self._data_source = data.Connector(**data_from)
         data.Connector.register(label, self)
         self.setup(**setup_kwargs)
 

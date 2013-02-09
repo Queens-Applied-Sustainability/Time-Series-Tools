@@ -1,7 +1,7 @@
 
 rename:
     routine: timeflow.Rename
-    data:
+    data_from:
         source: time-series.csv
     columns:
         DateTime: time
@@ -10,23 +10,23 @@ rename:
 
 warm:
     routine: timeflow.BooleanFilter
-    data:
-        source: import
+    data_from:
+        source: rename
         get: new
     column: temperature
-    operator: ">"
-    value: 15.2
+    operator: ">="
+    value: 15.4
 
 
-# $ timeflow workflow.yaml warm csv
+# $ timeflow workflow.yaml warm
 
 
-save:
-    routine: timeflow.Save
-    data:
-        source: warm
-        get: true
-    save_as: time-series-warm.csv
+# save:
+#     routine: timeflow.Save
+#     data:
+#         source: warm
+#         get: true
+#     save_as: time-series-warm.csv
 
 
 # $ timeflow workflow.yaml
