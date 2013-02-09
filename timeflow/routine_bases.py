@@ -34,12 +34,19 @@ class RoutineBase(object):
 
     def get_new(self, **kwargs):
         columns = self.operate(**kwargs)
+        try:
+            for column in columns:
+                print 'COL', column
+        except:
+            pass
+        print 'COLS', columns
         return columns if columns is not None else []
 
     def get_all(self, **kwargs):
         new_columns = self.get_new(**kwargs)
         if any(new_columns):
-            self.data[self.label] = new_columns
+            for column in new_columns:
+                self.data[column] = new_columns[column]
         return self.data
 
     def get_if(self, **kwargs):

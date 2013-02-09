@@ -14,6 +14,7 @@ class ConstantColumns(RoutineBase):
 
     def operate(self):
         cols = pd.DataFrame(index=self.data.index)
+        print self.constants.items()
         for label, value in self.constants.items():
             if label in self.data:
                 logging.warning('Overwriting {} with {}s.'.format(label, value))
@@ -50,3 +51,4 @@ class BooleanFilter(RoutineBase):
         column = self.data[self.filter_column]
         result = bool_op_map[self.filter_op](column, self.filter_value)
         return result
+
