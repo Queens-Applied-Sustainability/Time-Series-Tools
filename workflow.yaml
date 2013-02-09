@@ -1,29 +1,32 @@
 
-map_cols:
-    routine: timeflow.MapColumns
+rename:
+    routine: timeflow.Rename
     data:
         source: time-series.csv
-    map:
+    columns:
         DateTime: time
         Temperature: temperature
-    const:
-        description: bs
 
 
 warm:
-    routine: timeflow.BoolFilter
+    routine: timeflow.BooleanFilter
     data:
         source: import
+        get: new
     column: temperature
     operator: ">"
     value: 15.2
 
-# run with
-# timeflow workflow.yaml select_clear -o time-series-out.csv -t csv
 
-# save:
-#     routine: timeflow.CSVExport
-#     data:
-#         source: warm
-#         if: true
-#     save_to: time-series-out.csv
+# $ timeflow workflow.yaml warm csv
+
+
+save:
+    routine: timeflow.Save
+    data:
+        source: warm
+        get: true
+    save_as: time-series-warm.csv
+
+
+# $ timeflow workflow.yaml

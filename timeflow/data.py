@@ -2,6 +2,13 @@
 do stuff with data
 """
 
+import re
+import pandas as pd
+
+
+CSV_RE = re.compile(r'.*\.csv$')
+
+
 class LabeledRegistry(dict):
     """like a dict, but if a keyerror is raised, it will try to import it as
     a module."""
@@ -27,17 +34,29 @@ class Connector(object):
             raise KeyError('Routine label conflict for {}.'.format(label))
         routines[label] = routine
 
-    def get(self):
+    def get(self, **kwargs):
         # handle merges and all that...
         try:
+            # is it registered?
             source_routine = routines[self.source_label]
+            return source_routine.get_all()
         except KeyError:
-            raise KeyError('The routine "{}" is not registered and could not'
-                'be imported. Registered routines: {}'.format(self.source_label,
-                ', '.join(routines.keys())))
-        source_data = source_routine.get_all()
-        return source_data
-
+            # can we open it as a file?
+            try:
+                data_file = open(self.source_label, 'r')
+            except IOError:
+                # TODO: try to import a module...
+                raise KeyError('The routine "{}" is not registered and could '
+                               ' not be opened or imported. Registered '
+                               'routines: {}'.format(self.source_label,
+                               ', '.join(routines.keys())))
+            finally:
+                if re.match(CSV_RE, self.source_label):
+                    index_col = kwargs.get('index_col', 0)
+                    source_data = pd.read_csv(data_file,
+                                              index_col=index_col)
+                    return source_data
+        raise KeyError('Could not get {}.'.format(self.source_label))
 
 
 class FileSource(object):
@@ -47,47 +66,3 @@ class FileSource(object):
     def get(self):
         return open(self.filename, 'r')
             
-
-class FileReadBase(RoutineBase):
-    """Special class opens files.
-    Does not connect to a source with a DataConnector.
-    """
-    __metaclass__ = ABCMeta
-
-    def __init__(self, label, data_from):
-        DataConnector.register(label, self)
-        self._data_source = FileSource(data_from)
-
-    def get_new(self, **kwargs):
-        raise NotImplemented
-
-    def get_all(self, **kwargs):
-        return self.operate(**kwargs)
-
-    def get_if(self, **kwargs):
-        raise NotImplemented
-
-
-class CSVImport(FileReadBase):
-    """This import class expects a file-like stream as its source"""
-    def __init__(self, map=None, const=None, **kwargs):
-        super(CSVImport, self).__init__(**kwargs)
-        self._map = map
-        self.const = const
-
-    def operate(self):
-        from numpy import genfromtxt
-        csv_config = {
-            'delimiter': ',',
-            'names': True,
-            'dtype': None,
-        }
-        return genfromtxt(self.data, **csv_config)
-
-
-class FileSaveBase(RoutineBase):
-
-    def __init__(self, label, data_from, save_to, source_modifiers=None):
-        self._data_source = DataConnector(data_from, source_modifiers)
-        self.filename = save_to
-

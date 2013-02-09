@@ -1,36 +1,47 @@
-
+from abc import ABCMeta, abstractmethod
+import pandas as pd
+from timeflow import data
 
 class RoutineBase(object):
     __metaclass__ = ABCMeta
 
-    def __init__(self, label, data_from, source_modifiers=None):
-        self._data_source = DataConnector(data_from, source_modifiers)
-        DataConnector.register(label, self)
+    def __init__(self, label, data_from, source_modifiers=None, **setup_kwargs):
+        self.label = label
+        self._data_source = data.Connector(data_from, source_modifiers)
+        data.Connector.register(label, self)
+        self.setup(**setup_kwargs)
 
-    @property
-    def data(self):
-        return self._data_source.get()
+    @abstractmethod
+    def setup(self):
+        pass
+
+    def data():
+        doc = "The data property."
+        def fget(self):
+            if not hasattr(self, '_data'):
+                self._data = self._data_source.get()
+            return self._data
+        def fset(self, value):
+            self._data = value
+        def fdel(self):
+            del self._data
+        return locals()
+    data = property(**data())
 
     @abstractmethod
     def operate(self, **kwargs):
         pass
 
-    def operate_if(self, **kwargs):
-        """Be optimistic that the operate method just happens to return a
-        suitable boolean column"""
-        condition = self.operate(**kwargs)
-        return condition
-
     def get_new(self, **kwargs):
         columns = self.operate(**kwargs)
-        return columns
+        return columns if columns is not None else []
 
     def get_all(self, **kwargs):
-        columns = self.get_new(**kwargs)
-        full = self.data # link the data and new columns
-        return full
+        new_columns = self.get_new(**kwargs)
+        if any(new_columns):
+            self.data[self.label] = new_columns
+        return self.data
 
     def get_if(self, **kwargs):
-        condition = self.operate_if(**kwargs)
-        compressed = self.data.compress(condition)
+        compressed = self.data[self.get_new(**kwargs)]
         return compressed
