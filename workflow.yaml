@@ -18,6 +18,15 @@ warm:
     value: 15.4
 
 
+meta:
+    routine: timeflow.ConstantColumns
+    data_from:
+        source: warm
+        get: if_false
+    constants:
+        its: cool
+
+
 # $ timeflow workflow.yaml warm
 
 

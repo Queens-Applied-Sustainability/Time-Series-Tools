@@ -10,6 +10,14 @@ MODULE_RE = re.compile(r'(.*)\.(\w+)$')
 CSV_RE = re.compile(r'.*\.csv$')
 
 
+get_map = {
+    'if_true': 'get_if_true',
+    'if_false': 'get_if_false',
+    'new': 'get_new',
+    'all': 'get_all',
+}
+
+
 class LabeledRegistry(dict):
     """like a dict, but if a keyerror is raised, it will try to import it as
     a module."""
@@ -32,7 +40,6 @@ class LabeledRegistry(dict):
         except IOError: pass
 
         raise KeyError('can not get "{}".'.format(item))
-
 
 
 routines = LabeledRegistry()
@@ -65,7 +72,9 @@ class Connector(object):
                 return pd.read_csv(source_routine, index_col=index_col)
             else:
                 raise IOError('can\'t import that.')
-        return source_routine.get_all()
+
+        get = kwargs.get('get', 'all')
+        return getattr(source_routine, get_map[get])()
 
 
 class FileSource(object):
