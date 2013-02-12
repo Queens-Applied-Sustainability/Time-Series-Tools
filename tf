@@ -66,6 +66,16 @@ if __name__ == '__main__':
         logging.basicConfig(filename='timeflow_run.log', level=logging.INFO)
         logging.info('setting up logging...')
 
+    if args.verbose:
+        print 'VERBOSE'
+        logger = logging.getLogger('blah')
+        logger.setLevel(logging.DEBUG)
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.DEBUG)
+        logger.addHandler(ch)
+
+    logging.info('blah blah blah')
+
     workflow_file = open(args.workflow, 'r')
     registry = setup(workflow_file)
 
