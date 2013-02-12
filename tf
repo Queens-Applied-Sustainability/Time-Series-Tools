@@ -24,7 +24,7 @@ def setup(workflow_file):
 
 
 if __name__ == '__main__':
-    import argparse
+    import argparse, logging
 
     parser = argparse.ArgumentParser(description="TimeFlow is a simple utility"\
         " for managing indexed data-processing workflows.",
@@ -61,6 +61,10 @@ if __name__ == '__main__':
                      help='type to output')
 
     args = parser.parse_args()
+
+    if not args.quiet:
+        logging.basicConfig(filename='timeflow_run.log', level=logging.INFO)
+        logging.info('setting up logging...')
 
     workflow_file = open(args.workflow, 'r')
     registry = setup(workflow_file)

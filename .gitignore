@@ -36,3 +36,6 @@ nosetests.xml
 
 # doc builds
 _build
+
+# logs
+*.log
