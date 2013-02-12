@@ -3,11 +3,12 @@
 run a timeflow thing
 """
 
-import yaml
 from timeflow import LabeledRegistry, get_map
 
 
 def setup(workflow_file):
+    import yaml
+
     routine_registry = LabeledRegistry()
     workflow = yaml.load(workflow_file)
     
@@ -24,14 +25,41 @@ def setup(workflow_file):
 
 if __name__ == '__main__':
     import argparse
-    parser = argparse.ArgumentParser(description="timeflow",
-                                     epilog="yep, timeflow")
+
+    parser = argparse.ArgumentParser(description="TimeFlow is a simple utility"\
+        " for managing indexed data-processing workflows.",
+        epilog="The goal is to make it painless (and even fun?) to write your"\
+        " genius algorithms as stand-alone routiens, which you can plug"\
+        " together using a declarative YAML workflow definition.")
+    # positional arguments
     parser.add_argument('workflow', help='the yaml workflow description')
-    parser.add_argument('-r', '--routine', default='save',# nargs='+',
-                        help='the routine whose output you want')
-    parser.add_argument('-g', '--get', default='all',
-                        choices=['if_true', 'if_false', 'new', 'all'],
-                        help='output mode for the routine')
+
+    # optional arguments
+    parser.add_argument('--version', action='store_false',
+                        help='report the version of the timeflow installation')
+    loudness = parser.add_mutually_exclusive_group()
+    loudness.add_argument('-v', '--verbose', action='store_true',
+                        help='show lots of running info')
+    loudness.add_argument('-q', '--quiet', action='store_true',
+                        help='mute console output')
+
+    # control arguments
+    control = parser.add_argument_group('control arguments')
+    control.add_argument('-r', '--routine', default='save',
+                         help='the routine whose output you want')
+    control.add_argument('-c', '--column', dest='column', nargs='+',
+                         help='retrieve specified columns')
+    control.add_argument('-f', '--filter', dest='filtercolumn',
+                         help='remove rows where this column evaluats false')
+
+    # output arguments
+    out = parser.add_argument_group('output options')
+    out.add_argument('-o', '--output', default='timeflowed',
+                     help='filename to save')
+    out.add_argument('-t', '--type', dest='outputtype', default='csv',
+                     choices=['csv', 'plot'],
+                     help='type to output')
+
     args = parser.parse_args()
 
     workflow_file = open(args.workflow, 'r')
