@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+import logging
 import pandas as pd
 from timeflow import data
 
@@ -18,6 +19,7 @@ class RoutineBase(object):
     def data():
         doc = "The data property."
         def fget(self):
+            logging.debug('getting from within' + self.label)
             if not hasattr(self, '_data'):
                 self._data = self._data_source.get()
             return self._data
@@ -31,24 +33,3 @@ class RoutineBase(object):
     @abstractmethod
     def operate(self, **kwargs):
         pass
-
-    def get_new(self, **kwargs):
-        columns = self.operate(**kwargs)
-        try:
-            for column in columns:
-                print 'COL', column
-        except:
-            pass
-        print 'COLS', columns
-        return columns if columns is not None else []
-
-    def get_all(self, **kwargs):
-        new_columns = self.get_new(**kwargs)
-        if any(new_columns):
-            for column in new_columns:
-                self.data[column] = new_columns[column]
-        return self.data
-
-    def get_if(self, **kwargs):
-        compressed = self.data[self.get_new(**kwargs)]
-        return compressed

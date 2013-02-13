@@ -12,8 +12,8 @@ warm:
     routine: timeflow.BooleanFilter
     data_from:
         source: rename
-        get: new
-    column: temperature
+    new_column: warm
+    filter_column: temperature
     operator: ">="
     value: 15.4
 
@@ -22,12 +22,22 @@ meta:
     routine: timeflow.ConstantColumns
     data_from:
         source: warm
-        get: if_false
+        filter: warm
     constants:
-        its: cool
+        its: not cool
 
 
-# $ timeflow workflow.yaml warm
+merged:
+    routine: timeflow.Passthrough
+    data_from:
+        source: rename
+        merge:
+            source: meta
+            how: left
+            copy: false
+
+
+# $ timeflow workflow.yaml -r meta
 
 
 # save:

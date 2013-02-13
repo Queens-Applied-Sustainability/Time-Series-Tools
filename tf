@@ -1,16 +1,19 @@
 #!/usr/bin/python
 """
-run a timeflow thing
+Parse a declarative workflow configuration and run it.
 """
-
-from timeflow import LabeledRegistry, get_map
-
 
 def setup(workflow_file):
     import yaml
+    from timeflow import LabeledRegistry
 
     routine_registry = LabeledRegistry()
+
+    logging.debug('loading yaml workflow')
     workflow = yaml.load(workflow_file)
+    if not isinstance(workflow, dict):
+        raise ValueError('Workflow "{}" did not parse to a dict (is it yaml?)'
+            .format(workflow_file.name))
     
     def build_routine(routine_structure):
         label, config = routine_structure
@@ -21,6 +24,16 @@ def setup(workflow_file):
     map(build_routine, workflow.items())
 
     return routine_registry
+
+
+def get_connected(source, filtercolumn):
+    from timeflow import Connector
+
+    if filtercolumn and '=' in filtercolumn:
+        raise NotImplemented
+
+    data = Connector(source, filter=filtercolumn)
+    return data
 
 
 if __name__ == '__main__':
@@ -41,16 +54,16 @@ if __name__ == '__main__':
     loudness.add_argument('-v', '--verbose', action='store_true',
                         help='show lots of running info')
     loudness.add_argument('-q', '--quiet', action='store_true',
-                        help='mute console output')
+                        help='suppress info and warnings')
 
     # control arguments
     control = parser.add_argument_group('control arguments')
     control.add_argument('-r', '--routine', default='save',
                          help='the routine whose output you want')
-    control.add_argument('-c', '--column', dest='column', nargs='+',
-                         help='retrieve specified columns')
+    # control.add_argument('-c', '--column', dest='column', nargs='+',
+    #                      help='retrieve specified columns')
     control.add_argument('-f', '--filter', dest='filtercolumn',
-                         help='remove rows where this column evaluats false')
+                         help='remove rows where this column evaluates false')
 
     # output arguments
     out = parser.add_argument_group('output options')
@@ -62,21 +75,22 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if not args.quiet:
-        logging.basicConfig(filename='timeflow_run.log', level=logging.INFO)
-        logging.info('setting up logging...')
+    if args.quiet:
+        logging.basicConfig(level=logging.ERROR)
+    elif not args.verbose:
+        logging.basicConfig(level=logging.INFO)
+    elif args.verbose:
+        logging.basicConfig(level=logging.DEBUG)
 
-    if args.verbose:
-        print 'VERBOSE'
-        logger = logging.getLogger('blah')
-        logger.setLevel(logging.DEBUG)
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.DEBUG)
-        logger.addHandler(ch)
-
-    logging.info('blah blah blah')
-
+    logging.debug('opening workflow file')
     workflow_file = open(args.workflow, 'r')
+
+    logging.debug('registering workflow routines')
     registry = setup(workflow_file)
 
-    print getattr(registry[args.routine], get_map[args.get])()
+    logging.debug('connecting to routine "{}"'.format(args.routine))
+    data = get_connected(args.routine, args.filtercolumn)
+
+    print data.get()
+    # logging.info('Running workflow for "{}"...'.format(args.routine))
+
